@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Your Profile{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-5xl mx-auto px-4">
+    <h2 class="text-2xl font-semibold text-blue-800 mb-6 text-center">👤 Your Profile</h2>
+    <p class="text-center text-gray-600 mb-4">Role: {{ session['role']|title }}</p>
+    <p class="text-center text-gray-600 mb-6">Username: {{ session['username'] }}</p>
+
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-semibold text-blue-700">📊 KPI Submission History</h2>
+        <p class="text-gray-600 text-sm">Track your past KPI entries and performance grades.</p>
+    </div>
+    
+    <div class="relative z-10 max-w-5xl mx-auto bg-white p-6 rounded shadow">
+        {% if kpis %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-blue-800 text-white">
+                <tr>
+                <th class="px-4 py-2 text-left">Date</th>
+                <th class="px-4 py-2 text-left">KPI Name</th>
+                <th class="px-4 py-2 text-left">Score</th>
+                <th class="px-4 py-2 text-left">Weight</th>
+                <th class="px-4 py-2 text-left">Grade</th>
+                <th class="px-4 py-2 text-left">Submitted By</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+                {% for kpi in kpis %}
+                <tr>
+                <td class="px-4 py-2">{{ kpi.date.strftime('%Y-%m-%d') }}</td>
+                <td class="px-4 py-2">{{ kpi.kpi_name }}</td>
+                <td class="px-4 py-2">{{ "%.0f"|format(kpi.score) }}</td>
+                <td class="px-4 py-2">{{ "%.0f"|format(kpi.weight * 100) }}%</td>
+                <td class="px-4 py-2 font-semibold 
+                    {% if 'Excellent' in kpi.grade %}text-green-600
+                    {% elif 'Good' in kpi.grade %}text-blue-600
+                    {% elif 'Average' in kpi.grade %}text-yellow-600
+                    {% elif 'Poor' in kpi.grade %}text-red-600
+                    {% else %}text-gray-700{% endif %}">
+                    {{ kpi.grade }}
+                </td>
+                <td class="px-4 py-2">
+                    {% if kpi.submitted_by == current_user %}
+                    Self
+                    {% else %}
+                    {{ kpi.submitted_by }}
+                    {% endif %}
+                </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center text-gray-600 py-6">
+            <p>No KPI entries found yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="relative z-10 max-w-5xl mx-auto px-4">
+        <h2 class="text-2xl font-semibold text-blue-800 mb-4 text-center">
+            ⏱️ Daily Timesheet Overview <br>({{ now().strftime('%Y-%m-%d') }})
+        </h2>
+        <p class="text-gray-600 text-center mb-2">
+            Role: {{ session['role']|title }}
+        </p>
+        <p class="text-sm text-gray-500 text-center mb-6">
+            {% if session['role'].lower() in ['admin', 'hr', 'supervisor', 'senior manager'] %}
+            Based on all users' clock-ins for today
+            {% else %}
+            Based on your clock-ins for today
+            {% endif %}
+        </p>
+        
+        {% if entries %}
+            <div class="overflow-x-auto bg-white shadow rounded-lg p-4">
+            <table class="min-w-full text-sm text-left border border-gray-300">
+                <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                <tr>
+                    <th class="px-4 py-2">Employee</th>
+                    <th class="px-4 py-2">Clock In</th>
+                    <th class="px-4 py-2">Clock Out</th>
+                    <th class="px-4 py-2">Location</th>
+                    <th class="px-4 py-2">Status</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                {% for entry in entries %}
+                <tr>
+                    <td class="px-4 py-2">{{ entry.employee.username }}</td>
+                    <td class="px-4 py-2">{{ entry.clock_in.strftime('%H:%M:%S') }}</td>
+                    <td class="px-4 py-2">
+                    {% if entry.clock_out %}
+                        {{ entry.clock_out.strftime('%H:%M:%S') }}
+                    {% else %}
+                        —
+                    {% endif %}
+                    </td>
+                    <td class="px-4 py-2">{{ entry.location or 'N/A' }}</td>
+                    <td class="px-4 py-2">
+                    {% if entry.clock_in and entry.clock_out %}
+                        ✅ Completed
+                    {% else %}
+                        ⏳ In Progress
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <p class="text-center text-gray-600 mt-4">No clock-ins recorded for today yet.</p>
+        {% endif %}
+
+
+
+    <div class="text-center mt-6">
+        <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 hover:underline">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+
+<!-- This template is used to display the list of employees with their roles and actions. 
+     It includes a table that lists each employee's username, role, and provides links for editing or deactivating the employee. 
+     A back link is provided to return to the dashboard. -->
+<!-- The template uses Jinja2 syntax to loop through the employees list and display each user's information.

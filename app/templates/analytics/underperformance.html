@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Underperformance Report{% endblock %}
+
+{% block content %}
+<div class="text-center mb-6">
+  <h2 class="text-2xl font-semibold text-red-600">📉 Underperformance Report</h2>
+  <p class="text-gray-600 text-sm">List of employees flagged for consistently low KPI scores.</p>
+</div>
+
+<div class="relative z-10 max-w-5xl mx-auto bg-white p-6 rounded shadow">
+  {% if flagged_users %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-red-700 text-white">
+          <tr>
+            <th class="px-4 py-2 text-left">Username</th>
+            <th class="px-4 py-2 text-left">Role</th>
+            <th class="px-4 py-2 text-left">Avg Score</th>
+            <th class="px-4 py-2 text-left">Last KPI Date</th>
+            <th class="px-4 py-2 text-left">Flag</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          {% for user in flagged_users %}
+          <tr class="{% if user.avg_score < 50 %}bg-red-50{% endif %}">
+            <td class="px-4 py-2">{{ user.username }}</td>
+            <td class="px-4 py-2">{{ user.role }}</td>
+            <td class="px-4 py-2 font-semibold text-red-600">{{ "%.1f"|format(user.avg_score) }}</td>
+            <td class="px-4 py-2">{{ user.last_kpi_date }}</td>
+            <td class="px-4 py-2 text-red-500 font-semibold">Underperforming</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center text-gray-600 py-6">
+      <p>🎉 No underperforming employees at the moment.</p>
+    </div>
+  {% endif %}
+</div>
+
+<div class="text-center mt-6">
+  <a href="{{ url_for('main.dashboard') }}" class="text-blue-700 text-sm hover:underline">← Back to Dashboard</a>
+</div>
+{% endblock %}

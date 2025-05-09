@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}KPI Overachievers{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-5xl mx-auto px-4">
+  <h2 class="text-2xl font-semibold text-blue-800 mb-6 text-center">🏆 KPI Overachievers</h2>
+
+  <!-- Leaderboard Table -->
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-blue-700 mb-3">Top Performers</h3>
+    <div class="overflow-x-auto rounded-lg shadow">
+      <table class="min-w-full bg-white border border-gray-200 divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-100 text-gray-700 text-left">
+          <tr class="divide-x divide-gray-300 text-center">
+            <th class="px-4 py-2">Rank</th>
+            <th class="px-4 py-2">Username</th>
+            <th class="px-4 py-2">Role</th>
+            <th class="px-4 py-2">Excellent Scores</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-center">
+          {% for entry in leaderboard %}
+          <tr class="hover:bg-gray-50 divide-x divide-gray-200">
+            <td class="px-4 py-2 font-medium">{{ loop.index }}</td>
+            <td class="px-4 py-2">{{ entry.username }}</td>
+            <td class="px-4 py-2">{{ entry.role }}</td>
+            <td class="px-4 py-2 text-green-700 font-semibold">{{ entry.a_player_count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h3 class="text-md font-semibold text-blue-700 mb-2 text-center">🎯 Grade Distribution</h3>
+      <canvas id="pieChart" height="220"></canvas>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h3 class="text-md font-semibold text-blue-700 mb-2 text-center">📈 "A Player" Scores per User</h3>
+      <canvas id="barChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Back to Dashboard -->
+  <div class="text-center mt-8">
+    <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 hover:underline">← Back to Dashboard</a>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const pieData = {{ chart_data.pie | tojson }};
+  const barData = {{ chart_data.bar | tojson }};
+
+  new Chart(document.getElementById("pieChart"), {
+    type: 'pie',
+    data: {
+      labels: pieData.labels,
+      datasets: [{
+        label: 'Grade Distribution',
+        data: pieData.data,
+        backgroundColor: ['#4CAF50', '#FFC107', '#03A9F4', '#FF5722']
+      }]
+    }
+  });
+
+  new Chart(document.getElementById("barChart"), {
+    type: 'bar',
+    data: {
+      labels: barData.labels,
+      datasets: [{
+        label: '"A Player" Count',
+        data: barData.data,
+        backgroundColor: '#1976d2'
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+{% endblock %}

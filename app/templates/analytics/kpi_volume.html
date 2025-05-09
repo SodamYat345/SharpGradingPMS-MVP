@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="relative-z-10 opacity-80 max-w-5xl mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">📅 KPI Submission Volume Over Time</h2>
+
+    <div class="bg-white p-6 shadow rounded-lg border border-gray-100">
+        <canvas id="volumeChart" class="w-full h-90"></canvas>
+    </div>
+
+    <div class="mt-8">
+        <a href="{{ url_for('main.dashboard') }}" class="inline-block text-blue-600 hover:text-blue-800 font-medium">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ labels | tojson }};
+    const data = {{ data | tojson }};
+
+    new Chart(document.getElementById('volumeChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'KPI Submissions (Supervisor/HR Only)',
+                data: data,
+                backgroundColor: '#1976d2'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Submissions'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

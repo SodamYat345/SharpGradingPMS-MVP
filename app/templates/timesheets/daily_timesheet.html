@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Daily Timesheet Overview{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-5xl mx-auto px-4">
+<h2 class="text-2xl font-semibold text-blue-800 mb-4 text-center">
+    ⏱️ Daily Timesheet Overview <br>({{ now().strftime('%Y-%m-%d') }})
+</h2>
+<p class="text-gray-600 text-center mb-2">
+    Role: {{ session['role']|title }}
+</p>
+<p class="text-sm text-gray-500 text-center mb-6">
+    {% if session['role'].lower() in ['admin', 'hr', 'supervisor', 'senior manager'] %}
+    Based on all users' clock-ins for today
+    {% else %}
+    Based on your clock-ins for today
+    {% endif %}
+</p>
+
+{% if entries %}
+    <div class="overflow-x-auto bg-white shadow rounded-lg p-4">
+    <table class="min-w-full text-sm text-left border border-gray-300">
+        <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+        <tr>
+            <th class="px-4 py-2">Employee</th>
+            <th class="px-4 py-2">Clock In</th>
+            <th class="px-4 py-2">Clock Out</th>
+            <th class="px-4 py-2">Location</th>
+            <th class="px-4 py-2">Status</th>
+        </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+        {% for entry in entries %}
+        <tr>
+            <td class="px-4 py-2">{{ entry.employee.username }}</td>
+            <td class="px-4 py-2">{{ entry.clock_in.strftime('%H:%M:%S') }}</td>
+            <td class="px-4 py-2">
+            {% if entry.clock_out %}
+                {{ entry.clock_out.strftime('%H:%M:%S') }}
+            {% else %}
+                —
+            {% endif %}
+            </td>
+            <td class="px-4 py-2">{{ entry.location or 'N/A' }}</td>
+            <td class="px-4 py-2">
+            {% if entry.clock_in and entry.clock_out %}
+                ✅ Completed
+            {% else %}
+                ⏳ In Progress
+            {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% else %}
+    <p class="text-center text-gray-600 mt-4">No clock-ins recorded for today yet.</p>
+{% endif %}
+
+  <div class="text-center mt-6">
+    <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 hover:underline">← Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

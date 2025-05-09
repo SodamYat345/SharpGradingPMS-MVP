@@ -1,0 +1,6 @@
+PassengerEnabled on
+PassengerAppRoot /home/prestyoz/public_html/SharpGradingPMS-MVP
+PassengerPython /usr/bin/python3
+
+#RewriteEngine on
+#RewriteRule ^(.*)$ http://127.0.0.1:5000/$1 [P]

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Submit KPI{% endblock %}
+
+{% block content %}
+<div class="text-center mb-6">
+  <h2 class="text-2xl font-semibold text-blue-700">Submit KPIs<br></h2>
+  {% if is_supervisor %}
+    <p class="text-sm text-gray-600"><em>Logged in as Supervisor: {{ session['username'] }}</em><br><br></p>
+    {% if selected_user %}
+      <p class="text-gray-600 text-sm mt-1">📌 Submitting KPIs for: <strong>{{ selected_user.username }}</strong> ({{ selected_user.role|title }})</p>
+    {% endif %}
+  {% endif %}
+</div>
+
+<div class="max-w-xl mx-auto bg-white p-6 rounded shadow relative z-10">
+  {% if message %}
+    {% set grade = message.split('Grade:')[-1].strip() if 'Grade:' in message else '' %}
+    {% if 'Excellent' in grade %}
+      <p class="bg-green-100 text-green-700 px-4 py-2 rounded mb-4 text-sm">{{ message }}</p>
+    {% elif 'Good' in grade %}
+      <p class="bg-blue-100 text-blue-700 px-4 py-2 rounded mb-4 text-sm">{{ message }}</p>
+    {% elif 'Average' in grade %}
+      <p class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded mb-4 text-sm">{{ message }}</p>
+    {% elif 'Poor' in grade %}
+      <p class="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-sm">{{ message }}</p>
+    {% else %}
+      <p class="bg-gray-100 text-gray-800 px-4 py-2 rounded mb-4 text-sm">{{ message }}</p>
+    {% endif %}
+  {% endif %}
+
+  <form method="POST" class="space-y-4">
+    {% if is_supervisor %}
+      <div>
+        <label for="employee_id" class="block text-sm font-medium text-gray-700">Select Employee</label>
+        <select name="employee_id" id="employee_id" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2">
+          {% for emp in employees %}
+            <option value="{{ emp.id }}" {% if selected_user and emp.id == selected_user.id %}selected{% endif %}>
+              {{ emp.username }} ({{ emp.role|title }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    {% endif %}
+
+    <div>
+      <label for="kpi_name" class="block text-sm font-medium text-gray-700">KPI Name</label>
+      <select name="kpi_name" id="kpi_name" required class="mt-1 block w-full border border-gray-300 rounded px-3 py-2">
+        {% for kpi, weight in kpi_options.items() %}
+          <option value="{{ kpi }}">{{ kpi }} ({{ weight * 100 }}%)</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label for="score" class="block text-sm font-medium text-gray-700">Score (0-100)</label>
+      <input type="number" name="score" id="score" min="0" max="100" required
+             class="mt-1 block w-full border border-gray-300 rounded px-3 py-2">
+    </div>
+
+    <button type="submit" class="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-900">
+      Submit KPI
+    </button>
+  </form>
+</div>
+
+<div class="text-center mt-6">
+  <a href="{{ url_for('main.dashboard') }}" class="text-blue-700 text-sm hover:underline">← Back to Dashboard</a>
+</div>
+{% endblock %}
+
+<!-- This HTML template is used to render the KPI entry form. It includes a dropdown for selecting employees (if the user is a supervisor), a dropdown for selecting KPIs, and an input field for entering the score. The form submits the data to the server for processing. The template also displays any messages passed from the server, such as success or error messages. -->

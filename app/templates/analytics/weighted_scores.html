@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">📊 Weighted Performance Leaderboard</h2>
+
+    <div class="overflow-x-auto shadow rounded-lg border border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
+                <tr class="text-center text-sm font-semibold text-gray-700">
+                    <th class="px-4 py-3">Rank</th>
+                    <th class="px-4 py-3">Employee</th>
+                    <th class="px-4 py-3">Avg. Weighted Score</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for entry in leaderboard %}
+                <tr class="text-center hover:bg-gray-50">
+                    <td class="px-4 py-2">{{ loop.index }}</td>
+                    <td class="px-4 py-2">{{ entry.username }}</td>
+                    <td class="px-4 py-2">{{ entry.avg_weighted_score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-10">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">📈 Leaderboard Chart</h3>
+        <div class="bg-white p-4 rounded shadow border border-gray-100">
+            <canvas id="leaderboardChart" class="w-full h-64"></canvas>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <a href="{{ url_for('main.dashboard') }}" class="inline-block text-blue-600 hover:text-blue-800 font-medium">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ chart_labels | tojson }};
+    const data = {{ chart_data | tojson }};
+
+    new Chart(document.getElementById('leaderboardChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Avg Weighted Score',
+                data: data,
+                backgroundColor: '#0288d1'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 10
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+<!--  This template is used to display the leaderboard of employees based on their average weighted scores. It includes a table showing the rank, employee name, and average score, as well as a bar chart visualizing the scores. The data for the chart is passed from Flask using Jinja2 syntax.  -->
+<!-- The chart is created using Chart.js, and the data is formatted to be compatible with the library. The template also includes a back link to return to the dashboard.  -->
+<!-- The leaderboard is sorted by average weighted score, and the rank is dynamically generated based on the order of the entries.  -->
+<!-- The template uses Jinja2 syntax to loop through the leaderboard data and display each employee's information.  -->

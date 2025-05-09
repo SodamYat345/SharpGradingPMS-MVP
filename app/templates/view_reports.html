@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}KPI Reports{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="relative z-10 opacity-80 max-w-6xl mx-auto px-4">
+  <h2 class="text-2xl font-semibold text-blue-800 mb-6">📊 All KPI Reports</h2>
+
+  {% if kpis %}
+    <div class="overflow-x-auto rounded shadow bg-white border border-gray-200 mb-6">
+      <table class="min-w-full text-sm text-left">
+        <thead class="bg-blue-800 text-white">
+          <tr>
+            <th class="py-3 px-4">Date</th>
+            <th class="py-3 px-4">Employee ID</th>
+            <th class="py-3 px-4">KPI</th>
+            <th class="py-3 px-4">Score</th>
+            <th class="py-3 px-4">Weight</th>
+            <th class="py-3 px-4">Grade</th>
+            <th class="py-3 px-4">Submitted By</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for kpi in kpis %}
+          <tr class="hover:bg-gray-50">
+            <td class="py-2 px-4">{{ kpi.date.strftime('%Y-%m-%d') }}</td>
+            <td class="py-2 px-4">{{ kpi.employee_id }}</td>
+            <td class="py-2 px-4">{{ kpi.kpi_name }}</td>
+            <td class="py-2 px-4">{{ kpi.score }}</td>
+            <td class="py-2 px-4">{{ kpi.weight }}</td>
+            <td class="py-2 px-4 font-semibold {% if 'Excellent' in kpi.grade %}text-green-700{% elif 'Poor' in kpi.grade %}text-red-600{% elif 'Average' in kpi.grade %}text-yellow-600{% else %}text-blue-700{% endif %}">
+              {{ kpi.grade }}
+            </td>
+            <td class="py-2 px-4">{{ kpi.submitted_by }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center text-gray-500 mt-6">
+      <p>📭 No KPI reports found.</p>
+    </div>
+  {% endif %}
+
+  <!-- Charts -->
+  <div class="grid md:grid-cols-2 gap-6 mt-10">
+    <div class="bg-white shadow p-4 rounded border">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">📈 Average Score by KPI</h3>
+      <canvas id="barChart" height="180"></canvas>
+    </div>
+    <div class="bg-white shadow p-4 rounded border">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">📊 Score Distribution</h3>
+      <canvas id="pieChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- Links -->
+  <div class="mt-8 text-blue-700 text-sm space-y-2">
+    <a href="{{ url_for('main.underperformance') }}" class="hover:underline block">🔻 View Underperformance Report</a>
+    <a href="{{ url_for('main.dashboard') }}" class="hover:underline block">← Back to Dashboard</a>
+  </div>
+</div>
+
+<!-- ChartJS Logic -->
+<script>
+  const kpis = {{ kpi_data | tojson }};
+  const categoryScores = {};
+  const categoryCounts = {};
+  const pieData = {};
+
+  kpis.forEach(k => {
+    categoryScores[k.kpi_name] = (categoryScores[k.kpi_name] || 0) + k.score;
+    categoryCounts[k.kpi_name] = (categoryCounts[k.kpi_name] || 0) + 1;
+    pieData[k.kpi_name] = (pieData[k.kpi_name] || 0) + k.score;
+  });
+
+  const labels = Object.keys(categoryScores);
+  const avgScores = labels.map(k => (categoryScores[k] / categoryCounts[k]).toFixed(2));
+
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Average KPI Score',
+        data: avgScores,
+        backgroundColor: '#1976d2'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: 'Score (%)' } },
+        x: { title: { display: true, text: 'KPI Category' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: {
+      labels: Object.keys(pieData),
+      datasets: [{
+        label: 'Score Distribution',
+        data: Object.values(pieData),
+        backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
+      }]
+    }
+  });
+</script>
+{% endblock %}

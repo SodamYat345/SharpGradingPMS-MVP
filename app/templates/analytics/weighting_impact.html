@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KPI Weighting Impact</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>KPI Category Weighting Impact</h2>
+
+    <h3>Stacked Bar: Weighted KPI Contributions per User</h3>
+    <canvas id="stackedBarChart" width="800" height="400"></canvas>
+
+    <h3>Pie Chart: KPI Weight Distribution (All Users)</h3>
+    <canvas id="pieChart" width="600" height="300"></canvas>
+
+    <script>
+        const users = {{ users|tojson }};
+        const stackedData = {{ stacked_data|tojson }};
+        const pieLabels = {{ pie_labels|tojson }};
+        const pieData = {{ pie_data|tojson }};
+
+        new Chart(document.getElementById('stackedBarChart'), {
+            type: 'bar',
+            data: {
+                labels: users,
+                datasets: stackedData.map((entry, index) => ({
+                    label: entry.label,
+                    data: entry.data,
+                    backgroundColor: `hsl(${index * 60}, 70%, 60%)`,
+                    stack: 'stack1'
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'KPI Contribution Breakdown by User'
+                    }
+                },
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('pieChart'), {
+            type: 'pie',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    data: pieData,
+                    backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff']
+                }]
+            }
+        });
+    </script>
+
+    <br><a href="{{ url_for('main.dashboard') }}">← Back to Dashboard</a>
+</body>
+</html>

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">📈 KPI Trends Over Time</h2>
+
+    <div class="mb-4">
+        {% if not has_supervisor_data and not has_self_data %}
+            <div class="bg-yellow-50 text-yellow-800 p-4 rounded border border-yellow-200">
+                <p>No KPI data submitted yet.</p>
+            </div>
+        {% elif has_supervisor_data and has_self_data %}
+            <button id="toggleButton" onclick="toggleData()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Show Self-Submitted Data
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="bg-white mt-6 p-6 shadow rounded-lg border border-gray-100">
+        <canvas id="trendChart" class="w-full h-96"></canvas>
+    </div>
+
+    <div class="mt-8">
+        <a href="{{ url_for('main.dashboard') }}" class="inline-block text-blue-600 hover:text-blue-800 font-medium">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const supervisorData = {{ chart_data | tojson }};
+const fallbackData = {{ fallback_data | tojson }};
+const hasSupervisorData = {{ has_supervisor_data | tojson }};
+const hasSelfData = {{ has_self_data | tojson }};
+
+let showingSelf = false;
+
+function renderChart(data, labelPrefix = '') {
+    const grouped = {};
+    data.forEach(item => {
+        if (!grouped[item.kpi_name]) {
+            grouped[item.kpi_name] = { labels: [], scores: [] };
+        }
+        grouped[item.kpi_name].labels.push(item.date);
+        grouped[item.kpi_name].scores.push(item.score);
+    });
+
+    const datasets = Object.keys(grouped).map(kpiName => ({
+        label: labelPrefix + kpiName,
+        data: grouped[kpiName].scores,
+        borderColor: '#' + Math.floor(Math.random()*16777215).toString(16),
+        borderWidth: 2,
+        tension: 0.3,
+        fill: false
+    }));
+
+    const labels = [...new Set(data.map(d => d.date))];
+
+    if (window.kpiChart) window.kpiChart.destroy();
+
+    const ctx = document.getElementById('trendChart');
+    window.kpiChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Score'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function toggleData() {
+    showingSelf = !showingSelf;
+    const btn = document.getElementById('toggleButton');
+
+    if (showingSelf) {
+        renderChart(fallbackData, '(Self) ');
+        btn.textContent = 'Show Supervisor-Submitted Data';
+    } else {
+        renderChart(supervisorData);
+        btn.textContent = 'Show Self-Submitted Data';
+    }
+}
+
+// Auto-load correct chart
+if (hasSupervisorData) {
+    renderChart(supervisorData);
+} else if (hasSelfData) {
+    renderChart(fallbackData, '(Self) ');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Submit Timesheet{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-lg mx-auto px-4 py-6 bg-white rounded-xl shadow-md">
+
+  <h2 class="text-2xl font-semibold text-blue-800 text-center mb-4">🕘 Timesheet</h2>
+
+  {% if message %}
+    <div class="mb-4 text-green-700 text-center font-medium">
+      {{ message }}
+    </div>
+  {% endif %}
+
+  <form method="POST" id="timesheet-form" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Location Description:</label>
+      <input type="text" name="location" required
+        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+    </div>
+
+    <!-- Hidden geo fields -->
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
+
+    <div id="location-status" class="text-sm text-gray-600 text-center mb-2"></div>
+
+    <div class="text-center">
+      {% if action == 'clock_in' %}
+        <button type="submit" id="submit-button"
+          class="w-full bg-blue-600 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
+          ⏱ Clock In
+        </button>
+      {% elif action == 'clock_out' %}
+        <button type="submit" id="submit-button"
+          class="w-full bg-green-600 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
+          🕒 Clock Out
+        </button>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Timesheet status feedback -->
+  <div class="mt-6 text-sm text-gray-700 text-center space-y-2">
+    {% if action == 'done' %}
+      <div class="text-green-700">
+        ✅ You clocked in at <strong>{{ entry.clock_in.strftime('%H:%M:%S') }}</strong> and
+        clocked out at <strong>{{ entry.clock_out.strftime('%H:%M:%S') }}</strong> today.
+      </div>
+    {% elif action == 'clock_out' %}
+      <div>🕒 You clocked in at {{ entry.clock_in.strftime('%H:%M:%S') }}.<br>Ready to clock out now?</div>
+    {% elif action == 'clock_in' %}
+      <div>🕘 You're about to clock in. Make sure your location is correct!</div>
+    {% endif %}
+
+    {% if timesheet_completed %}
+      <div class="text-green-600 font-medium">✅ Great job! You’ve completed your timesheet for today.</div>
+    {% elif action != 'done' %}
+      <div class="text-red-600 font-medium">❗ You have not yet completed today’s timesheet. Please clock in and clock out.</div>
+    {% endif %}
+  </div>
+
+  <div class="text-center mt-6">
+    <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 hover:underline">← Back to Dashboard</a>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const latitudeField = document.getElementById('latitude');
+    const longitudeField = document.getElementById('longitude');
+    const statusDiv = document.getElementById('location-status');
+
+    if (navigator.geolocation) {
+      statusDiv.className = "text-gray-600";
+      statusDiv.innerHTML = "📡 Getting your location... <span class='animate-pulse'>⏳</span>";
+
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        latitudeField.value = pos.coords.latitude;
+        longitudeField.value = pos.coords.longitude;
+        statusDiv.className = "text-green-700 font-medium";
+        statusDiv.innerHTML = "📍 Location captured successfully! ✅";
+      }, function() {
+        statusDiv.className = "text-red-600 font-medium";
+        statusDiv.innerHTML = "⚠️ Could not get location. Please allow location access.";
+      });
+    } else {
+      statusDiv.className = "text-red-600 font-medium";
+      statusDiv.innerHTML = "❌ Geolocation not supported by your browser.";
+    }
+
+    const form = document.getElementById('timesheet-form');
+    const submitButton = document.getElementById('submit-button');
+    if (form && submitButton) {
+      form.addEventListener('submit', function() {
+        submitButton.disabled = true;
+        submitButton.innerText = 'Submitting...';
+      });
+    }
+  });
+</script>
+{% endblock %}
+
+<!-- This template is for the timesheet page where users can clock in and out. It includes location capture, form submission, and feedback messages. -->
+<!-- The template uses Flask's Jinja2 templating engine to render dynamic content based on the user's actions and the state of their timesheet. --> 
+<!-- The JavaScript code captures the user's location and updates the form accordingly. It also handles form submission to prevent multiple submissions. -->
+<!-- The CSS styles are included to enhance the visual appearance of the page, making it user-friendly and responsive. -->
+<!-- The template is designed to be simple and effective, providing a clear interface for users to manage their timesheets. --> 
+<!-- The use of icons and color coding helps to convey the status of the timesheet and location capture process. -->
+<!-- The template is structured to provide a seamless user experience, guiding users through the clocking in and out process with clear instructions and feedback. -->  

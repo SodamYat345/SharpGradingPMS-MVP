@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Team KPI Comparisons</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>KPI Team Comparisons</h2>
+
+    <h3>Average KPI Score Per Role</h3>
+    <canvas id="avgRoleChart" width="600" height="300"></canvas>
+
+    <h3>Category Breakdown by Role</h3>
+    <div id="categoryCharts"></div>
+
+    <script>
+        const avgRoleScores = {{ avg_role_scores | tojson }};
+        const categoryScores = {{ category_scores | tojson }};
+
+        // Average score per role
+        const roles = Object.keys(avgRoleScores);
+        const scores = Object.values(avgRoleScores);
+
+        new Chart(document.getElementById('avgRoleChart'), {
+            type: 'bar',
+            data: {
+                labels: roles,
+                datasets: [{
+                    label: 'Average KPI Score',
+                    data: scores,
+                    backgroundColor: '#4caf50'
+                }]
+            }
+        });
+
+        // Category charts per role
+        for (const category in categoryScores) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 300;
+            document.getElementById('categoryCharts').appendChild(canvas);
+
+            const roleNames = Object.keys(categoryScores[category]);
+            const categoryData = Object.values(categoryScores[category]);
+
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: roleNames,
+                    datasets: [{
+                        label: category + ' Score by Role',
+                        data: categoryData,
+                        backgroundColor: '#1976d2'
+                    }]
+                }
+            });
+        }
+    </script>
+
+    <br><a href="{{ url_for('main.dashboard') }}">← Back to Dashboard</a>
+</body>
+</html>
+<!-- <!-- This template is used to display KPI comparisons between different teams. It includes a bar chart showing the average KPI score per role and additional bar charts for each KPI category breakdown by role.  -->
+<!--      The data for the charts is passed from the Flask backend using Jinja2 templating.  -->

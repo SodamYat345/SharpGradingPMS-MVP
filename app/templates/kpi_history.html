@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}KPI History{% endblock %}
+
+{% block content %}
+<div class="text-center mb-6">
+  <h2 class="text-2xl font-semibold text-blue-700">📊 KPI Submission History</h2>
+  <p class="text-gray-600 text-sm">Track your past KPI entries and performance grades.</p>
+</div>
+
+<div class="relative z-10 max-w-5xl mx-auto bg-white p-6 rounded shadow">
+  {% if kpis %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-blue-800 text-white">
+          <tr>
+            <th class="px-4 py-2 text-left">Date</th>
+            <th class="px-4 py-2 text-left">KPI Name</th>
+            <th class="px-4 py-2 text-left">Score</th>
+            <th class="px-4 py-2 text-left">Weight</th>
+            <th class="px-4 py-2 text-left">Grade</th>
+            <th class="px-4 py-2 text-left">Submitted By</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          {% for kpi in kpis %}
+          <tr>
+            <td class="px-4 py-2">{{ kpi.date.strftime('%Y-%m-%d') }}</td>
+            <td class="px-4 py-2">{{ kpi.kpi_name }}</td>
+            <td class="px-4 py-2">{{ "%.0f"|format(kpi.score) }}</td>
+            <td class="px-4 py-2">{{ "%.0f"|format(kpi.weight * 100) }}%</td>
+            <td class="px-4 py-2 font-semibold 
+              {% if 'Excellent' in kpi.grade %}text-green-600
+              {% elif 'Good' in kpi.grade %}text-blue-600
+              {% elif 'Average' in kpi.grade %}text-yellow-600
+              {% elif 'Poor' in kpi.grade %}text-red-600
+              {% else %}text-gray-700{% endif %}">
+              {{ kpi.grade }}
+            </td>
+            <td class="px-4 py-2">
+              {% if kpi.submitted_by == current_user %}
+                Self
+              {% else %}
+                {{ kpi.submitted_by }}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center text-gray-600 py-6">
+      <p>No KPI entries found yet.</p>
+    </div>
+  {% endif %}
+</div>
+
+<div class="text-center mt-6">
+  <a href="{{ url_for('main.dashboard') }}" class="text-blue-700 text-sm hover:underline">← Back to Dashboard</a>
+</div>
+{% endblock %}

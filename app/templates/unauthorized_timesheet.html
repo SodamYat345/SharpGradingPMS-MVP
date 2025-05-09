@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Timesheet Access Denied{% endblock %}
+
+{% block content %}
+<div class="text-center text-red-600 max-w-lg mx-auto bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-2xl font-bold mb-4">⛔ Access Denied</h2>
+    <p class="mb-4">Your role ({{ session['role']|title }}) is not permitted to submit timesheets directly.</p>
+    <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 underline hover:text-blue-800">← Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ employee.username }}'s Timesheets</title>
+</head>
+<body>
+    <h2>Timesheets for {{ employee.username }} ({{ employee.role }})</h2>
+
+    {% if timesheets %}
+        <table border="1" cellpadding="6">
+            <tr>
+                <th>Date</th>
+                <th>Clock In</th>
+                <th>Clock Out</th>
+                <th>Location</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+            </tr>
+            {% for ts in timesheets %}
+                <tr>
+                    <td>{{ ts.clock_in.strftime("%Y-%m-%d") }}</td>
+                    <td>{{ ts.clock_in.strftime("%H:%M:%S") }}</td>
+                    <td>{{ ts.clock_out.strftime("%H:%M:%S") if ts.clock_out else 'Still clocked in' }}</td>
+                    <td>{{ ts.location }}</td>
+                    <td>{{ ts.latitude }}</td>
+                    <td>{{ ts.longitude }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No timesheet entries found for this employee.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('main.team_timesheets') }}">← Back to Team Timesheets</a>
+</body>
+</html>

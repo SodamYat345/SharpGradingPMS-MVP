@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submission Type Breakdown</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>KPI Submission Volume</h2>
+    <canvas id="volumeChart" width="600" height="300"></canvas>
+
+    <h2>Submission Type Breakdown</h2>
+    <canvas id="submissionTypeChart" width="600" height="300"></canvas>
+
+    <h2>Monthly Trends (Employee vs Supervisor)</h2>
+    <canvas id="monthlyChart" width="600" height="300"></canvas>
+
+    <br><a href="{{ url_for('main.dashboard') }}">← Back to Dashboard</a>
+
+    <script>
+        // Volume Chart
+        const volumeData = {
+            labels: {{ submission_counts.keys() | list | tojson }},
+            datasets: [{
+                label: 'Total Submissions per User',
+                data: {{ submission_counts.values() | list | tojson }},
+                backgroundColor: '#1976d2'
+            }]
+        };
+
+        new Chart(document.getElementById('volumeChart'), {
+            type: 'bar',
+            data: volumeData
+        });
+
+        // Submission Type Pie Chart
+        const typeData = {
+            labels: ['Employee-submitted', 'Supervisor-submitted'],
+            datasets: [{
+                label: 'Submission Breakdown',
+                data: [{{ submission_type['employee'] }}, {{ submission_type['supervisor'] }}],
+                backgroundColor: ['#42a5f5', '#ef5350']
+            }]
+        };
+
+        new Chart(document.getElementById('submissionTypeChart'), {
+            type: 'pie',
+            data: typeData
+        });
+
+        // Monthly Trend Line Chart
+        const months = {{ months | tojson }};
+        const empCounts = {{ employee_counts | tojson }};
+        const supCounts = {{ supervisor_counts | tojson }};
+
+        const trendData = {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Employee Submissions',
+                    data: empCounts,
+                    borderColor: '#42a5f5',
+                    fill: false
+                },
+                {
+                    label: 'Supervisor Submissions',
+                    data: supCounts,
+                    borderColor: '#ef5350',
+                    fill: false
+                }
+            ]
+        };
+
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: trendData
+        });
+    </script>
+</body>
+</html>

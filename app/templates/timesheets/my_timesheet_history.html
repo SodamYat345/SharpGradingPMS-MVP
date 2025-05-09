@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}My Timesheet History{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-5xl mx-auto px-4">
+  <h2 class="text-2xl font-semibold text-blue-800 mb-6 text-center">📅 My Timesheet History</h2>
+
+  {% if timesheets %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white shadow rounded-lg">
+        <thead class="bg-blue-100 text-blue-800">
+          <tr>
+            <th class="text-left py-3 px-4">Date</th>
+            <th class="text-left py-3 px-4">Clock In</th>
+            <th class="text-left py-3 px-4">Clock Out</th>
+            <th class="text-left py-3 px-4">Hours Worked</th>
+            <th class="text-left py-3 px-4">Location</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700">
+          {% for entry in timesheets %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="py-2 px-4">{{ entry.clock_in.strftime('%Y-%m-%d') }}</td>
+            <td class="py-2 px-4">{{ entry.clock_in.strftime('%H:%M:%S') }}</td>
+            <td class="py-2 px-4">
+              {% if entry.clock_out %}
+                {{ entry.clock_out.strftime('%H:%M:%S') }}
+              {% else %}
+                <span class="text-red-600 font-medium">❗ Not clocked out</span>
+              {% endif %}
+            </td>
+            <td class="py-2 px-4">
+              {% if entry.clock_out %}
+                {{ ((entry.clock_out - entry.clock_in).seconds // 3600) }}h {{ ((entry.clock_out - entry.clock_in).seconds % 3600) // 60 }}m
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="py-2 px-4">{{ entry.location }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-center text-gray-600 mt-4">No timesheet entries found yet.</p>
+  {% endif %}
+
+  <div class="text-center mt-6">
+    <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 hover:underline">← Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

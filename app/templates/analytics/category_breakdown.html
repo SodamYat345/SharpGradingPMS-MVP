@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}KPI Category Breakdown{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-4xl mx-auto px-4 opacity-90">
+  <h2 class="text-2xl font-semibold text-blue-700 mb-6 text-center">📊 KPI Category Breakdown</h2>
+
+  {% if session['role'].lower() in ['admin', 'hr', 'supervisor', 'senior manager'] %}
+    <p class="text-sm text-gray-500 text-center">Based on all users<br><br><br></p>
+  {% else %}
+    <p class="text-sm text-gray-500 text-center">Based on your submitted KPIs<br><br><br></p>
+  {% endif %}
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+    <div class="bg-white shadow rounded p-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">📈 Average Score by Category</h3>
+      <canvas id="barChart" height="200"></canvas>
+    </div>
+
+    <div class="bg-white shadow rounded p-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">📊 Category Contribution</h3>
+      <canvas id="pieChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="text-center mt-6">
+    <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 hover:underline">
+      ← Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const avgScores = {{ avg_scores|tojson }};
+  const categories = Object.keys(avgScores);
+  const values = Object.values(avgScores);
+
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: categories,
+      datasets: [{
+        label: 'Average KPI Score',
+        data: values,
+        backgroundColor: '#3b82f6'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: true, text: 'Average Score per Category' }
+      },
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: 'Score (%)' } },
+        x: { title: { display: true, text: 'Category' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: {
+      labels: categories,
+      datasets: [{
+        data: values,
+        backgroundColor: [
+          '#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899',
+          '#06b6d4','#84cc16','#facc15','#a78bfa','#64748b'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: 'Category Contribution' }
+      }
+    }
+  });
+</script>
+{% endblock %}

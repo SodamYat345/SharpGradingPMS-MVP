@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Manage Employees{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-5xl mx-auto px-4">
+    <h2 class="text-2xl font-semibold text-blue-800 mb-6 text-center">👥 Manage Employees</h2>
+
+    {% if employees %}
+        <div class="overflow-x-auto bg-white shadow rounded-md p-4">
+            <table class="min-w-full divide-y divide-gray-200 text-sm text-center">
+                <thead class="bg-gray-100 divide-x- divide-gray-300">
+                    <tr>
+                        <th class="px-4 py-2 font-medium text-gray-700">#</th>
+                        <th class="px-4 py-2 font-medium text-gray-700">Username</th>
+                        <th class="px-4 py-2 font-medium text-gray-700">Role</th>
+                        <th class="px-4 py-2 font-medium text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for user in employees %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2">{{ loop.index }}</td>
+                        <td class="px-4 py-2 font-medium text-gray-900">{{ user.username }}</td>
+                        <td class="px-4 py-2 capitalize text-gray-700">{{ user.role }}</td>
+                        <td class="px-4 py-2 space-x-2">
+                            <a href="#" class="text-blue-600 hover:underline text-sm">Edit</a>
+                            <span class="text-gray-400">|</span>
+                            <a href="#" class="text-red-500 hover:underline text-sm">Deactivate</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+        </div>
+    {% else %}
+        <p class="text-center text-sm text-gray-600 mt-4">No employees found.</p>
+    {% endif %}
+
+    <div class="text-center mt-6">
+        <a href="{{ url_for('main.dashboard') }}" class="text-blue-600 hover:underline">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+
+<!-- This template is used to display the list of employees with their roles and actions. 
+     It includes a table that lists each employee's username, role, and provides links for editing or deactivating the employee. 
+     A back link is provided to return to the dashboard. -->
+<!-- The template uses Jinja2 syntax to loop through the employees list and display each user's information.

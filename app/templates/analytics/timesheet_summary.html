@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timesheet Summary</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Timesheet Summary</h2>
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Total Hours Worked</th>
+                <th>Days Worked</th>
+                <th>Avg Daily Hours</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in summary %}
+            <tr>
+                <td>{{ entry.username }}</td>
+                <td>{{ entry.role }}</td>
+                <td>{{ entry.total_hours }}</td>
+                <td>{{ entry.days_worked }}</td>
+                <td>{{ entry.avg_daily_hours }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Average Hours Worked Per Day</h2>
+
+    {% if chart_labels %}
+        <canvas id="summaryChart" width="600" height="300"></canvas>
+        <script>
+        const ctx = document.getElementById('summaryChart').getContext('2d');
+
+
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|tojson }},
+                datasets: [{
+                    label: 'Average Hours Worked',
+                    data: {{ chart_data|tojson }},
+                    fill: false,
+                    borderColor: 'green',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Hours' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Date' }
+                    }
+                }
+            }
+        });
+        </script>
+    {% else %}
+        <p>No completed timesheet entries yet.</p>
+    {% endif %}
+
+    <br><a href="{{ url_for('main.dashboard') }}">← Back to Dashboard</a>
+</body>
+</html>
